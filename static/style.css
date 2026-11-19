@@ -1,0 +1,655 @@
+/* ==========================================================================
+   TÙY CHỈNH HỆ THỐNG GIAO DIỆN (BẠN CÓ THỂ ĐỔI ẢNH NỀN TẠI ĐÂY)
+   ========================================================================== */
+:root {
+  /* 💌 1. ẢNH NỀN CHO CẢNH BẤM THIỆP:
+     - Bạn có thể để file ảnh vào thư mục static (ví dụ: url('space.jpg') hoặc url('bg-card.jpg'))
+     - Hoặc dán link ảnh online bất kỳ: url('https://...') */
+  --bg-card: url('space.gif');
+  --bg-card-height: 82vh; /* Thu nhỏ chiều cao của space.gif lại một tí (bạn có thể chỉnh 75vh, 80vh, 85vh tùy thích) */
+  --card-overlay: rgba(12, 8, 24, 0.45);
+  /* Lớp phủ làm dịu nền để thiệp nổi bật */
+
+  /* 🎆 2. ẢNH NỀN CHO CẢNH BẮN PHÁO HOA:
+     - Mặc định là dải màu bầu trời đêm lãng mạn, hoặc đổi thành url('bg-fw.jpg') / url('space.jpg')
+     - Hoặc dán link ảnh online phong cảnh đêm, thành phố lung linh... */
+  --bg-fw: url('anh.jpg');
+  --fw-overlay: rgba(0, 0, 0, 0.2);
+  /* Lớp phủ pháo hoa */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #000;
+  color: #fff;
+  user-select: none;
+}
+
+/* ==========================================================================
+   CẢNH CHUYỂN TIẾP (SCENES)
+   ========================================================================== */
+.scene {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.scene.active {
+  display: flex;
+  animation: sceneFadeIn 1s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+
+.scene.leave {
+  animation: sceneLeave 1.2s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+@keyframes sceneFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sceneLeave {
+  to {
+    opacity: 0;
+    transform: scale(1.4);
+    filter: blur(8px);
+  }
+}
+
+/* ==========================================================================
+   CẢNH 1: GIAO DIỆN BẤM THIỆP (#scene-card)
+   ========================================================================== */
+#scene-card {
+  z-index: 2;
+  background-color: #03010a;
+  background-image: var(--bg-card);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: auto var(--bg-card-height, 82vh);
+}
+
+#scene-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--card-overlay);
+  backdrop-filter: blur(2px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Nền sao băng cho cảnh thiệp */
+#stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Khung sân khấu phong bì thư */
+.stage {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  transition: transform 1.2s cubic-bezier(.2, .8, .2, 1);
+}
+
+.stage.open {
+  transform: translateY(85px);
+  /* Hạ thư xuống để tờ thiệp trượt lên không bị khuất */
+}
+
+.envelope {
+  position: relative;
+  width: min(86vw, 350px);
+  height: 230px;
+  perspective: 900px;
+  cursor: pointer;
+  animation: floatEnv 4s ease-in-out infinite;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.5));
+}
+
+.stage.open .envelope {
+  animation: none;
+  cursor: default;
+}
+
+@keyframes floatEnv {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Lưng phong bì */
+.env-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #df9b5e, #bf7c43);
+  box-shadow: 0 0 35px rgba(255, 180, 90, 0.45);
+}
+
+/* Túi phong bì mặt trước */
+.pocket {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 10px;
+  background: linear-gradient(to bottom, #ebb078, #d89657);
+  clip-path: polygon(0 0, 50% 53%, 100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+/* Nắp phong bì */
+.flap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 58%;
+  z-index: 4;
+  background: linear-gradient(to bottom, #cf8545, #b86e2e);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  transition: transform 0.9s cubic-bezier(.4, 0, .2, 1), z-index 0s 0.45s;
+  pointer-events: none;
+}
+
+.stage.open .flap {
+  transform: rotateX(180deg);
+  z-index: 1;
+}
+
+/* Con dấu sáp trái tim */
+.seal {
+  position: absolute;
+  left: 50%;
+  top: 53%;
+  z-index: 5;
+  font-size: 2.1rem;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.stage.open .seal {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+}
+
+/* Tờ giấy lời chúc bên trong */
+.paper {
+  position: absolute;
+  left: 6%;
+  top: 14px;
+  width: 88%;
+  height: 230px;
+  z-index: 2;
+  padding: 20px 18px;
+  border-radius: 8px;
+  background: #fff9f0;
+  color: #4a2206;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 25px rgba(255, 220, 150, 0.6);
+  transition: transform 1.3s cubic-bezier(.2, .8, .2, 1) 0.65s;
+}
+
+.stage.open .paper {
+  transform: translateY(-170px);
+}
+
+.paper h1 {
+  font-size: 1.35rem;
+  color: #c62828;
+  font-weight: 700;
+}
+
+.paper p {
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.paper .sign {
+  font-style: italic;
+  margin-top: 6px;
+  color: #79431e;
+}
+
+/* Từng dòng chữ hiện dần */
+.line {
+  opacity: 0;
+}
+
+.stage.open .line {
+  animation: lineRise 0.8s ease forwards;
+}
+
+.stage.open .line:nth-child(1) {
+  animation-delay: 1.6s;
+}
+
+.stage.open .line:nth-child(2) {
+  animation-delay: 2.2s;
+}
+
+.stage.open .line:nth-child(3) {
+  animation-delay: 2.8s;
+}
+
+.stage.open .line:nth-child(4) {
+  animation-delay: 3.4s;
+}
+
+@keyframes lineRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gợi ý chạm mở thư */
+.tap {
+  font-size: 1.05rem;
+  opacity: 0.95;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  animation: tapBlink 1.6s ease-in-out infinite;
+}
+
+.stage.open .tap {
+  display: none;
+}
+
+@keyframes tapBlink {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.97);
+  }
+}
+
+/* Nút chuyển tiếp qua pháo hoa */
+.hint {
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #e53935, #c62828);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 18px rgba(229, 57, 53, 0.5);
+  transition: opacity 0.8s ease, transform 0.25s ease;
+}
+
+.stage.show-hint .hint {
+  opacity: 1;
+  pointer-events: auto;
+  animation: hintPulse 1.4s ease-in-out infinite;
+}
+
+.hint:hover {
+  transform: scale(1.08);
+}
+
+@keyframes hintPulse {
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 25px rgba(255, 90, 90, 0.85);
+  }
+}
+
+/* ==========================================================================
+   CẢNH 2: GIAO DIỆN PHÁO HOA & HÌNH GIF (#scene-fw)
+   ========================================================================== */
+#scene-fw {
+  z-index: 3;
+  background: var(--bg-fw) center / cover no-repeat;
+  cursor: crosshair;
+}
+
+#scene-fw::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--fw-overlay);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Canvas pháo hoa và hoa rơi */
+#fw {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 2;
+}
+
+/* Dòng chữ chúc mừng pháo hoa */
+.wish {
+  position: absolute;
+  top: 9%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: 90%;
+  max-width: 900px;
+  text-align: center;
+  font-size: clamp(1.7rem, 5.5vw, 3.4rem);
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 15px #ff7fa6, 0 0 35px #ff3377, 0 0 75px #ffb347;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#scene-fw.active .wish {
+  animation: wishPop 1.2s 0.5s cubic-bezier(.2, .9, .2, 1) forwards,
+    wishGlow 2.4s 1.7s ease-in-out infinite alternate;
+}
+
+@keyframes wishPop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.3);
+  }
+
+  70% {
+    transform: translateX(-50%) scale(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@keyframes wishGlow {
+  to {
+    text-shadow: 0 0 22px #ffcce0, 0 0 50px #ff1a66, 0 0 95px #ffd050;
+    transform: translateX(-50%) scale(1.02);
+  }
+}
+
+/* ==========================================================================
+   KHU VỰC HÌNH GIF SÔI ĐỘNG (GIF OVERLAY)
+   ========================================================================== */
+.gif-container {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  /* Giúp thao tác click/chạm xuyên qua để bắn pháo hoa */
+}
+
+/* Kiểu dáng cho thẻ ảnh GIF */
+.fw-gif {
+  position: absolute;
+  pointer-events: auto;
+  /* Cho phép click vào chính ảnh GIF */
+  cursor: pointer;
+  max-width: 95vw;
+  max-height: 90vh;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.65));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* Lớp phóng to hết mức (siêu to) */
+.gif-max {
+  width: clamp(280px, 46vw, 580px) !important;
+  max-height: 86vh !important;
+  height: auto;
+}
+
+/* Lớp phóng to đặc biệt cho GIF cần nổi bật */
+.gif-large {
+  width: clamp(220px, 34vw, 380px) !important;
+  max-height: 78vh !important;
+}
+
+.gif-medium {
+  width: clamp(140px, 22vw, 220px) !important;
+  max-height: 50vh !important;
+}
+
+.fw-gif:hover {
+  transform: scale(1.15) !important;
+  filter: drop-shadow(0 10px 24px rgba(255, 215, 0, 0.8));
+}
+
+/* --- Các vị trí đặt ảnh GIF có sẵn --- */
+.pos-bottom-left {
+  left: clamp(12px, 3.5vw, 40px);
+  bottom: clamp(16px, 3.5vh, 40px);
+}
+
+.pos-bottom-right {
+  right: clamp(12px, 3.5vw, 40px);
+  bottom: clamp(16px, 3.5vh, 40px);
+  z-index: 3;
+}
+
+/* Đứng cùng phía party (bên phải cạnh party) */
+.pos-beside-party {
+  right: clamp(150px, 22vw, 360px);
+  bottom: clamp(16px, 3.5vh, 40px);
+  z-index: 4;
+}
+
+.pos-center-bottom {
+  left: 50%;
+  bottom: clamp(16px, 3.5vh, 40px);
+  transform: translateX(-50%);
+}
+
+.pos-top-left {
+  left: clamp(12px, 3.5vw, 40px);
+  top: clamp(16px, 3.5vh, 40px);
+}
+
+.pos-top-right {
+  right: clamp(12px, 3.5vw, 40px);
+  top: clamp(16px, 3.5vh, 40px);
+}
+
+.pos-side-left {
+  left: clamp(12px, 3vw, 36px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+.pos-side-right {
+  right: clamp(12px, 3vw, 36px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+.pos-bottom-mid-left {
+  left: clamp(150px, 22vw, 360px);
+  bottom: clamp(16px, 3.5vh, 40px);
+  z-index: 4;
+}
+
+.pos-side-left.bounce {
+  animation: animBounceSideLeft 2.2s ease-in-out infinite;
+}
+@keyframes animBounceSideLeft {
+  0%, 100% { transform: translateY(-50%); }
+  50%      { transform: translateY(calc(-50% - 16px)); }
+}
+
+.pos-side-left.flip-x.bounce {
+  animation: animBounceSideLeftFlip 2.2s ease-in-out infinite;
+}
+@keyframes animBounceSideLeftFlip {
+  0%, 100% { transform: scaleX(-1) translateY(-50%); }
+  50%      { transform: scaleX(-1) translateY(calc(-50% - 16px)); }
+}
+
+.pos-side-right.bounce {
+  animation: animBounceSideRight 2.2s ease-in-out infinite;
+}
+@keyframes animBounceSideRight {
+  0%, 100% { transform: translateY(-50%); }
+  50%      { transform: translateY(calc(-50% - 16px)); }
+}
+
+/* --- Các hiệu ứng chuyển động cho GIF --- */
+/* Lật ảnh theo trục ngang (nhìn sang hướng ngược lại) */
+.flip-x {
+  transform: scaleX(-1);
+}
+
+.flip-x.bounce {
+  animation: animBounceFlip 2.2s ease-in-out infinite;
+}
+
+@keyframes animBounceFlip {
+  0%, 100% {
+    transform: scaleX(-1) translateY(0);
+  }
+  50% {
+    transform: scaleX(-1) translateY(-16px);
+  }
+}
+
+.flip-x.float {
+  animation: animFloatFlip 3s ease-in-out infinite;
+}
+
+@keyframes animFloatFlip {
+  0%, 100% {
+    transform: scaleX(-1) translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: scaleX(-1) translateY(-14px) rotate(-4deg);
+  }
+}
+
+.bounce {
+  animation: animBounce 2.2s ease-in-out infinite;
+}
+
+@keyframes animBounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+.pos-center-bottom.bounce {
+  animation: animBounceCenter 2.2s ease-in-out infinite;
+}
+
+@keyframes animBounceCenter {
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-16px);
+  }
+}
+
+.float {
+  animation: animFloat 3s ease-in-out infinite;
+}
+
+@keyframes animFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-14px) rotate(4deg);
+  }
+}
+
+.pulse {
+  animation: animPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes animPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Nhãn nhắc nhở bấm màn hình để bắn pháo hoa */
+.fw-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 4px 14px;
+  border-radius: 999px;
+  pointer-events: none;
+  animation: tapBlink 2s ease-in-out infinite;
+}

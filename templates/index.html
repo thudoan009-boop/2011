@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chúc mừng ngày Nhà giáo Việt Nam 20/11</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  {% set nguoi = ten or "Cô" %}
+
+  <!-- =========================================================================
+       CẢNH 1: GIAO DIỆN BẤM THIỆP
+       ========================================================================= -->
+  <section id="scene-card" class="scene active" {% if bg_card %}style="--bg-card: url('{{ bg_card }}');" {% endif %}>
+    <!-- Nền sao băng lãng mạn -->
+    <canvas id="stars"></canvas>
+
+    <div class="stage" id="stage">
+      <div class="envelope" id="envelope">
+        <div class="env-back"></div>
+
+        <div class="paper">
+          <h1 class="line">Chúc mừng 20/11 🎓</h1>
+
+          <p class="line">Chúc cô luôn mạnh khỏe, hạnh phúc và thật nhiều niềm vui</p>
+
+        </div>
+
+        <div class="pocket"></div>
+        <div class="flap"></div>
+        <div class="seal">❤️</div>
+      </div>
+
+      <p class="tap">💌 Chạm vào thư để mở</p>
+      <button id="btn-next" class="hint">bấm vào đây thử ii :&lt;</button>
+    </div>
+  </section>
+
+
+  <!-- =========================================================================
+       CẢNH 2: GIAO DIỆN BẮN PHÁO HOA & HÌNH GIF
+       ========================================================================= -->
+  <section id="scene-fw" class="scene" {% if bg_fw %}style="--bg-fw: url('{{ bg_fw }}');" {% endif %}>
+    <!-- Canvas vẽ pháo hoa nổ to và hoa rơi -->
+    <canvas id="fw"></canvas>
+
+    <!-- Dòng chữ lời chúc pháo hoa rực rỡ -->
+    <div class="wish">chúc {{ nguoi }} 20/11 dui dẻ nghen ✨</div>
+
+    <!-- =========================================================================
+         KHU VỰC HÌNH GIF SÔI ĐỘNG (Bạn có thể tự thêm / bớt / đổi ảnh ở đây)
+         -------------------------------------------------------------------------
+         - Muốn thêm ảnh GIF mới: chỉ cần thêm thẻ <img> với file trong static/ hoặc link online
+         - Vị trí: .pos-bottom-left, .pos-bottom-right, .pos-center-bottom, .pos-top-left, .pos-top-right
+         - Hiệu ứng: .bounce (nhún nhảy), .float (lơ lửng), .pulse (nhấp nháy)
+         ========================================================================= -->
+    <div class="gif-container" id="gif-container">
+      <!-- 1. GÓC DƯỚI PHẢI: Party GIF và Cute Cat siêu to phóng cực đại -->
+      <img class="fw-gif pos-bottom-right bounce gif-large" 
+           src="{{ url_for('static', filename='party.gif') }}"
+           alt="Party celebration GIF" 
+           title="Chúc mừng 20/11">
+
+      <img class="fw-gif pos-beside-party bounce gif-max" 
+           src="{{ url_for('static', filename='cute_cat.gif') }}"
+           alt="Cute Cat Dancing GIF" 
+           title="Mèo nhảy chúc mừng siêu to">
+
+      <!-- 2. GÓC DƯỚI TRÁI: Cute Cat to lật mặt hướng vào trung tâm -->
+      <img class="fw-gif pos-bottom-left bounce gif-large flip-x" 
+           src="{{ url_for('static', filename='cute_cat.gif') }}"
+           alt="Cute Cat Bottom Left" 
+           title="Mèo góc dưới trái">
+
+      <!-- 3. GIỮA ĐÁY BÊN TRÁI: Thêm Cute Cat để không bị trống hàng dưới -->
+      <img class="fw-gif pos-bottom-mid-left bounce gif-large flip-x" 
+           src="{{ url_for('static', filename='cute_cat.gif') }}"
+           alt="Cute Cat Mid Left Bottom" 
+           title="Mèo giữa dưới trái">
+
+      <!-- 4. GÓC TRÊN TRÁI: Cute Cat lơ lửng bồng bềnh -->
+      <img class="fw-gif pos-top-left float gif-medium flip-x" 
+           src="{{ url_for('static', filename='cute_cat.gif') }}"
+           alt="Cute Cat Top Left" 
+           title="Mèo góc trên trái">
+
+      <!-- 5. GÓC TRÊN PHẢI: Cute Cat lơ lửng bồng bềnh -->
+      <img class="fw-gif pos-top-right float gif-medium" 
+           src="{{ url_for('static', filename='cute_cat.gif') }}"
+           alt="Cute Cat Top Right" 
+           title="Mèo góc trên phải">
+
+      <!-- 6. CẠNH GIỮA BÊN TRÁI: Lấp đầy khoảng trống cạnh trái -->
+      <img class="fw-gif pos-side-left bounce gif-medium flip-x" 
+           src="{{ url_for('static', filename='cute_cat.gif') }}"
+           alt="Cute Cat Side Left" 
+           title="Mèo cạnh trái">
+
+      <!-- 7. CẠNH GIỮA BÊN PHẢI: Lấp đầy khoảng trống cạnh phải -->
+      <img class="fw-gif pos-side-right bounce gif-medium" 
+           src="{{ url_for('static', filename='cute_cat.gif') }}"
+           alt="Cute Cat Side Right" 
+           title="Mèo cạnh phải">
+
+      <!-- 8. Ở GIỮA DƯỚI: Bông hoa tươi cười phát sáng -->
+      <img class="fw-gif pos-center-bottom pulse gif-medium" 
+           src="{{ url_for('static', filename='flower_cheer.gif') }}"
+           alt="Flower cheer GIF" 
+           title="Bông hoa chúc mừng">
+    </div>
+
+    <!-- Nhắc nhở chạm màn hình -->
+    <div class="fw-hint">Chạm / click vào màn hình để bắn pháo hoa siêu to 🎆</div>
+  </section>
+
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>
