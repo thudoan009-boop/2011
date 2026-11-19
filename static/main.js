@@ -27,6 +27,29 @@ function boom() {
 const bgm = new Audio('/static/nhac.mp3');
 bgm.loop = true;
 bgm.volume = 0.35;
+bgm.preload = 'auto';
+
+async function playBgm() {
+  try {
+    await bgm.play();
+  } catch (error) {
+    console.warn('Không thể phát nhạc nền:', error);
+  }
+}
+
+let audioUnlockBound = false;
+function unlockAudio() {
+  if (!audioUnlockBound) {
+    audioUnlockBound = true;
+  }
+  if (bgm.paused) {
+    playBgm();
+  }
+}
+
+bgm.addEventListener('error', () => {
+  console.warn('Không tải được file nhạc nền: /static/nhac.mp3');
+});
 
 /* ===== Điều khiển cảnh & Mở thiệp ===== */
 let opened = false;
@@ -35,7 +58,7 @@ if (envelope) {
     if (opened) return;
     opened = true;
     stage.classList.add('open');
-    bgm.play().catch(() => {});
+    unlockAudio();
     sfxPool.forEach(s => {
       s.play().then(() => { s.pause(); s.currentTime = 0; }).catch(() => {});
     });
